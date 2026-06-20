@@ -1,5 +1,5 @@
 // Feito por Douglas Alves Costa
-// Nível Aventureiro - Shell Sort
+// Nivel Mestre - Quick Sort Multicriterio
 
 #include <stdio.h>
 #include <string.h>
@@ -32,39 +32,54 @@ void imprimirCartas(struct Carta lista[], int tamanho) {
     printf("\n");
 }
 
-// ============================================================
-// NÍVEL AVENTUREIRO: SHELL SORT
-// Ordenação por Ataque (Decrescente)
-// ============================================================
-
-void shellSortAtaque(struct Carta deck[], int n) {
-    int h = 1;
-
-    // Sequência de Knuth
-    while (h < n) {
-        h = 3 * h + 1;
+// Comparação customizada:
+// Primeiro: raridade decrescente
+// Segundo: nome em ordem alfabética crescente
+int compararCartas(const struct Carta* c1, const struct Carta* c2) {
+    if (c1->raridade > c2->raridade) {
+        return -1;
     }
 
-    while (h > 1) {
-        h = h / 3;
+    if (c1->raridade < c2->raridade) {
+        return 1;
+    }
 
-        for (int i = h; i < n; i++) {
-            struct Carta temp = deck[i];
-            int j = i;
+    return strcmp(c1->nome, c2->nome);
+}
 
-            while (j >= h && deck[j - h].ataque < temp.ataque) {
-                deck[j] = deck[j - h];
-                j -= h;
-            }
+void trocarCartas(struct Carta* a, struct Carta* b) {
+    struct Carta temp = *a;
+    *a = *b;
+    *b = temp;
+}
 
-            deck[j] = temp;
+int particionar(struct Carta registro[], int baixo, int alto) {
+    struct Carta pivo = registro[alto];
+    int i = baixo - 1;
+
+    for (int j = baixo; j < alto; j++) {
+        if (compararCartas(&registro[j], &pivo) <= 0) {
+            i++;
+            trocarCartas(&registro[i], &registro[j]);
         }
+    }
+
+    trocarCartas(&registro[i + 1], &registro[alto]);
+
+    return i + 1;
+}
+
+void quickSortRegistro(struct Carta registro[], int baixo, int alto) {
+    if (baixo < alto) {
+        int indicePivo = particionar(registro, baixo, alto);
+
+        quickSortRegistro(registro, baixo, indicePivo - 1);
+        quickSortRegistro(registro, indicePivo + 1, alto);
     }
 }
 
 int main() {
-
-    struct Carta deck_torneio[40] = {
+    struct Carta grande_registro[20] = {
         {225, "Elemental de Fogo", 6, 2, 5, 2},
         {105, "Ogro Esmagador", 5, 4, 5, 2},
         {102, "Elfa Arqueira", 2, 1, 2, 1},
@@ -84,41 +99,20 @@ int main() {
         {310, "Feiticeira Arcana", 4, 2, 5, 3},
         {220, "Basilisco Petrificante", 3, 5, 4, 2},
         {110, "Clerigo Iluminado", 1, 3, 2, 1},
-        {405, "Fenix Imortal", 9, 9, 9, 4},
-
-        {501, "Dragao Rubro", 10, 8, 9, 4},
-        {502, "Assassino Sombrio", 8, 3, 5, 3},
-        {503, "Guerreiro Orc", 6, 4, 4, 2},
-        {504, "Arqueiro Real", 4, 2, 3, 1},
-        {505, "Titã de Pedra", 9, 10, 8, 4},
-        {506, "Serpente Venenosa", 3, 1, 2, 1},
-        {507, "Cavaleira Lunar", 7, 6, 5, 3},
-        {508, "Demonio Abissal", 10, 7, 9, 4},
-        {509, "Golem Antigo", 6, 9, 6, 2},
-        {510, "Espadachim Errante", 5, 4, 3, 2},
-        {511, "Bruxa da Floresta", 4, 5, 4, 2},
-        {512, "Lobo Alfa", 6, 3, 4, 2},
-        {513, "Guardiao Celestial", 8, 8, 7, 3},
-        {514, "Necromante Sombrio", 7, 4, 6, 3},
-        {515, "Fera das Montanhas", 9, 6, 7, 3},
-        {516, "Aprendiz Arcano", 2, 2, 1, 1},
-        {517, "Cavaleiro Negro", 8, 7, 6, 3},
-        {518, "Troll Selvagem", 5, 8, 5, 2},
-        {519, "Fada Curandeira", 1, 4, 2, 1},
-        {520, "Imperador Draconico", 10, 10, 10, 4}
+        {405, "Fenix Imortal", 9, 9, 9, 4}
     };
 
-    printf("=== NIVEL AVENTUREIRO ===\n");
+    printf("=== NIVEL MESTRE ===\n");
 
-    printf("\n--- Deck do Torneio (Desordenado) ---\n");
-    imprimirCartas(deck_torneio, 40);
+    printf("\n--- Grande Registro Antes da Ordenacao ---\n");
+    imprimirCartas(grande_registro, 20);
 
-    shellSortAtaque(deck_torneio, 40);
+    quickSortRegistro(grande_registro, 0, 19);
 
-    printf("\n--- Deck Otimizado (Ataque Decrescente) ---\n");
-    imprimirCartas(deck_torneio, 40);
+    printf("\n--- Grande Registro Restaurado (Raridade Decrescente -> Nome Crescente) ---\n");
+    imprimirCartas(grande_registro, 20);
 
-    printf("Deck otimizado e pronto para o torneio!\n");
+    printf("O grande registro da arena foi restaurado!\n");
 
     return 0;
 }
